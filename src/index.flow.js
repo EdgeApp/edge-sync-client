@@ -1,3 +1,13 @@
 // @flow
 
-declare export function createRepo(syncKey: string): Promise<void>
+import { type EdgeFetchFunction, type EdgeLog } from 'edge-core-js'
+
+type CreateRepoOptions = {
+  fetch?: EdgeFetchFunction,
+  log?: EdgeLog
+}
+
+declare export function createRepo(
+  syncKey: string,
+  opts?: CreateRepoOptions
+): Promise<void>
