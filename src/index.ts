@@ -101,3 +101,17 @@ export async function createRepo(
 
   throw error
 }
+
+export function syncClient(
+  ...stuff,
+  opts: {
+    fetch: EdgeFetchFunction
+    log: EdgeLog
+  }
+) {
+  const { fetch = nodeFetch, log = someDefault } = opts
+
+  log('hey')
+  log.warn('failed')
+  log.error('blew up')
+}
