@@ -1,3 +1,3 @@
 // @flow
 
-declare export function dummy(x: number): number
+declare export function createRepo(syncKey: string): Promise<void>
