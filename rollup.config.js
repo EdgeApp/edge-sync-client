@@ -7,15 +7,17 @@ import packageJson from './package.json'
 
 const extensions = ['.ts']
 const babelOpts = {
-  babelHelpers: 'bundled',
+  babelHelpers: 'runtime',
   babelrc: false,
   extensions,
   include: ['src/**/*'],
+  plugins: ['@babel/plugin-transform-runtime'],
   presets: ['@babel/preset-env', '@babel/typescript']
 }
 const resolveOpts = { extensions }
 
 export default {
+  external: [/@babel\/runtime/],
   input: 'src/index.ts',
   output: [
     { file: packageJson.main, format: 'cjs' },
