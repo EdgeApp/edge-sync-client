@@ -3899,6 +3899,11 @@ rollup-plugin-flow-entry@^0.3.4:
   resolved "https://registry.yarnpkg.com/rollup-plugin-flow-entry/-/rollup-plugin-flow-entry-0.3.4.tgz#a7fcc334b7094889e60fa57224b0a1006882d15d"
   integrity sha512-fYCgSB4y+gMJbJTpsIqR65mPhmLh6rH9CQx3lN9SQ6bQzyMXGuYu2GEIT/SeSOeZAgkAyyi8EnFykcaKH+sZtw==
 
+rollup-plugin-mjs-entry@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-mjs-entry/-/rollup-plugin-mjs-entry-0.1.1.tgz#b3ab47e8d49ddb1916e36ba2480dc8a62a22d533"
+  integrity sha512-uii0Txyrn4YCgP++fypLqsT3LgO3Fx0gAZLZlWRSwKCuZ+bdSzAzdVbJFATmCHcBNlO61i65EgemOVdVQYONHA==
+
 rollup@^2.21.0:
   version "2.39.0"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.39.0.tgz#be4f98c9e421793a8fec82c854fb567c35e22ab6"
