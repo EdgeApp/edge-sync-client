@@ -16,7 +16,7 @@
   "license": "BSD-3-Clause",
   "author": "Airbitz, Inc.",
   "exports": {
-    "*": {
+    ".": {
       "import": "./lib/index.mjs",
       "require": "./lib/index.js"
     },
