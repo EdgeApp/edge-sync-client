@@ -2,12 +2,12 @@
 
 import { type EdgeFetchFunction, type EdgeLog } from 'edge-core-js'
 
-type CommonOptions = {
+type CreateRepoOptions = {
   fetch?: EdgeFetchFunction,
   log?: EdgeLog
 }
 
 declare export function createRepo(
-  repoId: string,
-  opts?: CommonOptions
+  syncKey: string,
+  opts?: CreateRepoOptions
 ): Promise<void>
