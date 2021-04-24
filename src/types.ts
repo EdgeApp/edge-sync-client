@@ -8,6 +8,7 @@ import {
   asObject,
   asOptional,
   asString,
+  asValue,
   Cleaner
 } from 'cleaners'
 
@@ -45,17 +46,6 @@ export const asRepoId = (raw: any): string => {
   }
 
   return repoId
-}
-
-export const asLiteral = <T extends string | number | null | undefined | {}>(
-  literal: T
-) => (raw: any): T => {
-  if (raw !== literal) {
-    throw new TypeError(
-      `Expected ${typeof literal} literal '${JSON.stringify(literal)}'`
-    )
-  }
-  return raw
 }
 
 // Document Types:
@@ -219,7 +209,7 @@ export interface ApiOkResponse<T> {
   data: T
 }
 const asApiOkResponse = <T>(data: Cleaner<T>): Cleaner<ApiOkResponse<T>> =>
-  asObject({ success: asLiteral(true), data })
+  asObject({ success: asValue(true), data })
 
 export interface ApiErrorResponse {
   success: false
@@ -227,7 +217,7 @@ export interface ApiErrorResponse {
   error?: string
 }
 const asApiErrorResponse = asObject({
-  success: asLiteral(false),
+  success: asValue(false),
   message: asString,
   error: asOptional(asString)
 })
