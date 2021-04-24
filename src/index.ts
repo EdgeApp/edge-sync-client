@@ -72,11 +72,11 @@ async function apiRequest<T>(
 }
 
 export async function createRepo(
-  repoId: string,
+  syncKey: string,
   opts: CommonOptions = {}
 ): Promise<PutRepoResponse> {
   let error: Error = new Error(
-    `Failed to create repo ${repoId}: no successful server response`
+    `Failed to create repo ${syncKey}: no successful server response`
   )
 
   for (let i = 0; i < syncServerHostnames.length; ++i) {
@@ -85,13 +85,13 @@ export async function createRepo(
 
     try {
       const response = await apiRequest(
-        { method: 'PUT', url, body: { repoId } },
+        { method: 'PUT', url, body: { syncKey } },
         asPutRepoResponse,
         opts
       )
 
       if (!response.success)
-        throw new Error(`Failed to create repo ${repoId}: ${response.message}`)
+        throw new Error(`Failed to create repo ${syncKey}: ${response.message}`)
 
       return response.data
     } catch (err) {
