@@ -2,18 +2,18 @@ import {
   asArray,
   asBoolean,
   asEither,
-  asMap,
   asNull,
   asNumber,
   asObject,
   asOptional,
   asString,
+  asValue,
   Cleaner
 } from 'cleaners'
 
 // Regexes:
 export const VALID_PATH_REGEX = /^(\/([^/ ]+([ ]+[^/ ]+)*)+)+\/?$/
-export const VALID_REPO_ID_REGEX = /^[a-f0-9]{40}$/
+export const VALID_SYNC_KEY_REGEX = /^[a-f0-9]{40}$/
 
 // Primitive Types
 
@@ -37,25 +37,14 @@ export const asPath = (raw: any): string => {
   return path
 }
 
-export const asRepoId = (raw: any): string => {
-  const repoId = asString(raw)
+export const asSyncKey = (raw: any): string => {
+  const syncKey = asString(raw)
 
-  if (!VALID_REPO_ID_REGEX.test(repoId)) {
-    throw new Error(`Invalid repo ID '${repoId}'`)
+  if (!VALID_SYNC_KEY_REGEX.test(syncKey)) {
+    throw new TypeError(`Invalid sync key '${syncKey}'`)
   }
 
-  return repoId
-}
-
-export const asLiteral = <T extends string | number | null | undefined | {}>(
-  literal: T
-) => (raw: any): T => {
-  if (raw !== literal) {
-    throw new TypeError(
-      `Expected ${typeof literal} literal '${JSON.stringify(literal)}'`
-    )
-  }
-  return raw
+  return syncKey
 }
 
 // Document Types:
@@ -70,7 +59,7 @@ const storeMergeDocumentShape = {
 }
 
 export type TimestampRev = string
-export const asTimestampRev = (ts: string | number): TimestampRev => {
+export const asTimestampRev = (ts: unknown): TimestampRev => {
   if (typeof ts === 'string' && /^\d{1,15}(\.\d+)?$/.test(ts)) {
     return ts
   }
@@ -90,7 +79,7 @@ export const asEdgeBox = asObject({
 
 // Also known as a "file pointer map"
 export type StoreFileTimestampMap = ReturnType<typeof asStoreFileTimestampMap>
-export const asStoreFileTimestampMap = asMap(asTimestampRev)
+export const asStoreFileTimestampMap = asObject(asTimestampRev)
 
 export interface FilePointers {
   paths: StoreFileTimestampMap
@@ -110,8 +99,8 @@ export const asTimestampHistory = asArray(
 export type StoreSettings = ReturnType<typeof asStoreSettings>
 export type StoreSettingsDocument = ReturnType<typeof asStoreSettingsDocument>
 export const asStoreSettings = asObject({
-  ipWhitelist: asMap(asBoolean),
-  apiKeyWhitelist: asMap(asBoolean)
+  ipWhitelist: asObject(asBoolean),
+  apiKeyWhitelist: asObject(asBoolean)
 })
 export const asStoreSettingsDocument = asObject({
   ...nanoDocumentShape,
@@ -176,7 +165,7 @@ export type FileChange = ReturnType<typeof asFileChange>
 export const asFileChange = asEither(asObject({ box: asEdgeBox }), asNull)
 
 export type ChangeSet = ReturnType<typeof asChangeSet>
-export const asChangeSet = asMap(asFileChange)
+export const asChangeSet = asObject(asFileChange)
 
 // Union of all store data types
 export type StoreData = StoreSettings | StoreRepo | StoreDirectory | StoreFile
@@ -204,7 +193,7 @@ export const asStoreDirectoryPathWithTimestamp = asObject({
 })
 
 export type GetFilesMap = ReturnType<typeof asGetFilesMap>
-export const asGetFilesMap = asMap(
+export const asGetFilesMap = asObject(
   asEither(asStoreFileWithTimestamp, asStoreDirectoryPathWithTimestamp)
 )
 
@@ -219,7 +208,7 @@ export interface ApiOkResponse<T> {
   data: T
 }
 const asApiOkResponse = <T>(data: Cleaner<T>): Cleaner<ApiOkResponse<T>> =>
-  asObject({ success: asLiteral(true), data })
+  asObject({ success: asValue(true), data })
 
 export interface ApiErrorResponse {
   success: false
@@ -227,7 +216,7 @@ export interface ApiErrorResponse {
   error?: string
 }
 const asApiErrorResponse = asObject({
-  success: asLiteral(false),
+  success: asValue(false),
   message: asString,
   error: asOptional(asString)
 })
@@ -250,7 +239,7 @@ export const asConfigGetResponse = asObject({
 
 export type GetFilesBody = ReturnType<typeof asGetFilesBody>
 export const asGetFilesBody = asObject({
-  repoId: asRepoId,
+  syncKey: asSyncKey,
   ignoreTimestamps: asOptional(asBoolean),
   paths: asStoreFileTimestampMap
 })
@@ -262,7 +251,7 @@ export const asGetFilesResponse = asObject({
 
 export type GetUpdatesBody = ReturnType<typeof asGetUpdatesBody>
 export const asGetUpdatesBody = asObject({
-  repoId: asRepoId,
+  syncKey: asSyncKey,
   timestamp: asTimestampRev
 })
 export type GetUpdatesResponse = ReturnType<typeof asGetUpdatesResponse>
@@ -274,7 +263,7 @@ export const asGetUpdatesResponse = asObject({
 
 export type PutRepoBody = ReturnType<typeof asPutRepoBody>
 export const asPutRepoBody = asObject({
-  repoId: asRepoId
+  syncKey: asSyncKey
 })
 export type PutRepoResponse = ReturnType<typeof asPutRepoResponse>
 export const asPutRepoResponse = asObject({
@@ -283,7 +272,7 @@ export const asPutRepoResponse = asObject({
 
 export type UpdateFilesBody = ReturnType<typeof asUpdateFilesBody>
 export const asUpdateFilesBody = asObject({
-  repoId: asRepoId,
+  syncKey: asSyncKey,
   timestamp: asTimestampRev,
   paths: asChangeSet
 })
