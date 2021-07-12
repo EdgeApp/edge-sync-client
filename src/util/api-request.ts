@@ -1,30 +1,20 @@
 import { Cleaner } from 'cleaners'
-import { EdgeFetchFunction, EdgeLog } from 'edge-core-js'
+import { EdgeFetchFunction } from 'edge-core-js'
 import nodeFetch from 'node-fetch'
 
 import { ApiRequest, ApiResponse, asApiResponse } from '../types'
 
 export interface CommonOptions {
   fetch?: EdgeFetchFunction
-  log?: EdgeLog
+  log?: (...args: any[]) => void
 }
 
 /**
- * A minimal EdgeLog implementation.
+ * Default log function for CommonOptions.
  */
-const defaultLog: EdgeLog = Object.assign(
-  function log(...args: any[]) {
-    console.log(...args)
-  },
-  {
-    error(...args: any[]) {
-      console.error(...args)
-    },
-    warn(...args: any[]) {
-      console.warn(...args)
-    }
-  }
-)
+const defaultLog = (...args: any[]): void => {
+  console.log(...args)
+}
 
 export async function apiRequest<T>(
   request: ApiRequest,
