@@ -1,8 +1,24 @@
-import { Cleaner } from 'cleaners'
+import { asMaybe, Cleaner } from 'cleaners'
 import { EdgeFetchFunction } from 'edge-core-js'
 import nodeFetch from 'node-fetch'
 
-import { ApiRequest, ApiResponse, asApiResponse } from '../types'
+import {
+  asServerErrorResponse,
+  GetStoreParams,
+  PostStoreBody,
+  PostStoreParams,
+  PutStoreParams
+} from '../types/rest-types'
+
+export type ApiRequestBody = PostStoreBody
+export type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
+
+export interface ApiRequest {
+  method: string
+  url: string
+  body?: ApiRequestBody
+  params?: ApiRequestParams
+}
 
 export interface CommonOptions {
   fetch?: EdgeFetchFunction
@@ -16,11 +32,11 @@ const defaultLog = (...args: any[]): void => {
   console.log(...args)
 }
 
-export async function apiRequest<T>(
+export async function apiRequest<ApiResponse>(
   request: ApiRequest,
-  asT: Cleaner<T>,
+  asApiResponse: Cleaner<ApiResponse>,
   opts: CommonOptions = {}
-): Promise<ApiResponse<T>> {
+): Promise<ApiResponse> {
   const { fetch = nodeFetch, log = defaultLog } = opts
   const { method, url, body } = request
 
@@ -36,10 +52,24 @@ export async function apiRequest<T>(
 
   log(`${method} ${url} returned ${response.status} in ${timeElapsed}ms`)
 
-  if (!response.ok)
-    throw new Error(`Request ${method} ${url} failed ${response.status}`)
+  const responseBody = await response.text()
 
-  const responseData = asApiResponse(asT)(await response.json())
+  if (!response.ok)
+    throw new Error(
+      `Failed request ${method} ${url} failed ${response.status}: ${responseBody}`
+    )
+
+  const errorResponse = asMaybe(asServerErrorResponse)(responseBody)
+
+  if (errorResponse != null) {
+    throw new Error(
+      `Failed request ${method} ${url} failed ${response.status}: ${errorResponse.message}`
+    )
+  }
+
+  const responseData = asApiResponse(
+    responseBody.trim() !== '' ? JSON.parse(responseBody) : undefined
+  )
 
   return responseData
 }

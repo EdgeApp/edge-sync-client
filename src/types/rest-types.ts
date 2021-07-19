@@ -23,6 +23,7 @@ export const asFileChange = asEither(asEdgeBox, asNull)
 export type ChangeSet = ReturnType<typeof asChangeSet>
 export const asChangeSet = asObject(asFileChange)
 
+// GET /v2/store
 export type GetStoreParams = ReturnType<typeof asGetStoreParams>
 export const asGetStoreParams = asObject({
   syncKey: asSyncKey,
@@ -34,6 +35,7 @@ export const asGetStoreResponse = asObject({
   changes: asChangeSet
 })
 
+// POST /v2/store
 export type PostStoreParams = ReturnType<typeof asPostStoreParams>
 export const asPostStoreParams = asObject({
   syncKey: asSyncKey,
@@ -49,6 +51,7 @@ export const asPostStoreResponse = asObject({
   changes: asChangeSet
 })
 
+// PUT /v2/store
 export type PutStoreParams = ReturnType<typeof asPutStoreParams>
 export const asPutStoreParams = asObject({
   syncKey: asSyncKey
