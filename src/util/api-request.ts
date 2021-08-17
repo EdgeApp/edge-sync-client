@@ -1,5 +1,4 @@
 import { asMaybe, Cleaner } from 'cleaners'
-import { EdgeFetchFunction } from 'edge-core-js'
 import nodeFetch from 'node-fetch'
 
 import {
@@ -9,6 +8,7 @@ import {
   PostStoreParams,
   PutStoreParams
 } from '../types/rest-types'
+import { CommonOptions, defaultLog } from './common'
 
 export type ApiRequestBody = PostStoreBody
 export type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
@@ -18,18 +18,6 @@ export interface ApiRequest {
   url: string
   body?: ApiRequestBody
   params?: ApiRequestParams
-}
-
-export interface CommonOptions {
-  fetch?: EdgeFetchFunction
-  log?: (...args: any[]) => void
-}
-
-/**
- * Default log function for CommonOptions.
- */
-const defaultLog = (...args: any[]): void => {
-  console.log(...args)
 }
 
 export async function apiRequest<ApiResponse>(

@@ -1,5 +1,5 @@
 // Types
-export type { CommonOptions } from './util/api-request'
+export type { CommonOptions } from './util/common'
 export * from './types/base-types'
 export * from './types/rest-types'
 

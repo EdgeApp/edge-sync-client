@@ -1,6 +1,7 @@
 import { syncServerHostnames } from '../constants'
 import { asPutStoreResponse, PutStoreResponse } from '../types/rest-types'
-import { apiRequest, CommonOptions } from './api-request'
+import { apiRequest } from './api-request'
+import { CommonOptions } from './common'
 
 export async function createRepo(
   syncKey: string,
