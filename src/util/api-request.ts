@@ -8,7 +8,7 @@ import {
   PostStoreParams,
   PutStoreParams
 } from '../types/rest-types'
-import { CommonOptions, defaultLog } from './common'
+import { CommonOptions, noOp } from './common'
 
 export type ApiRequestBody = PostStoreBody
 export type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
@@ -25,7 +25,7 @@ export async function apiRequest<ApiResponse>(
   asApiResponse: Cleaner<ApiResponse>,
   opts: CommonOptions = {}
 ): Promise<ApiResponse> {
-  const { fetch = nodeFetch, log = defaultLog } = opts
+  const { fetch = nodeFetch, log = noOp } = opts
   const { method, url, body } = request
 
   const start = Date.now()

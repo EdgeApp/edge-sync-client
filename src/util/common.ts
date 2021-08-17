@@ -9,8 +9,6 @@ export interface CommonOptions {
 }
 
 /**
- * Default log function for CommonOptions.
+ * E.g. used as the default log function for CommonOptions.
  */
-export const defaultLog = (...args: any[]): void => {
-  console.log(...args)
-}
+export const noOp = (): void => {}
