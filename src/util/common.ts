@@ -1,10 +1,8 @@
-import { EdgeFetchFunction } from 'edge-core-js'
-
 /**
  * Common options as a final argument for most public client-side API
  */
 export interface CommonOptions {
-  fetch?: EdgeFetchFunction
+  fetch?: typeof fetch
   log?: (...args: any[]) => void
 }
 

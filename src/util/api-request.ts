@@ -1,5 +1,5 @@
 import { asMaybe, Cleaner } from 'cleaners'
-import nodeFetch from 'node-fetch'
+import crossFetch from 'cross-fetch'
 
 import {
   asServerErrorResponse,
@@ -25,7 +25,7 @@ export async function apiRequest<ApiResponse>(
   asApiResponse: Cleaner<ApiResponse>,
   opts: CommonOptions = {}
 ): Promise<ApiResponse> {
-  const { fetch = nodeFetch, log = noOp } = opts
+  const { log = noOp, fetch = crossFetch } = opts
   const { method, url, body } = request
 
   const start = Date.now()

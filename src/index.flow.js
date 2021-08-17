@@ -1,9 +1,9 @@
 // @flow
 
-import { type EdgeFetchFunction } from 'edge-core-js'
+import { fetch } from './fetch.flow.js'
 
 type CommonOptions = {
-  fetch?: EdgeFetchFunction,
+  fetch?: typeof fetch,
   log?: (...args: any[]) => void
 }
 
