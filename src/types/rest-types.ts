@@ -10,6 +10,8 @@ import {
 
 import { asEdgeBox, asNonEmptyString, asSyncKey } from './base-types'
 
+type OmitPartially<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
 export type ServerErrorResponse = ReturnType<typeof asServerErrorResponse>
 export const asServerErrorResponse = asObject({
   success: asValue(false),
@@ -29,9 +31,12 @@ export const asGetStoreParams = asObject({
   syncKey: asSyncKey,
   hash: asOptional(asNonEmptyString)
 })
-export type GetStoreResponse = ReturnType<typeof asGetStoreResponse>
+export type GetStoreResponse = OmitPartially<
+  ReturnType<typeof asGetStoreResponse>,
+  'hash'
+>
 export const asGetStoreResponse = asObject({
-  hash: asString,
+  hash: asOptional(asString),
   changes: asChangeSet
 })
 

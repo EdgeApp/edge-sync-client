@@ -50,9 +50,15 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint"
   },
+  "dependencies": {
+    "cleaners": "^0.3.9",
+    "edge-core-js": "^0.17.23",
+    "node-fetch": "^2.6.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.10.4",
     "@rollup/plugin-node-resolve": "^8.1.0",
+    "@rollup/plugin-sucrase": "^3.1.0",
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
     "@types/node-fetch": "^2.5.8",
@@ -81,11 +87,5 @@
     "rollup-plugin-mjs-entry": "^0.1.1",
     "sucrase": "^3.15.0",
     "typescript": "^4.1.2"
-  },
-  "dependencies": {
-    "@rollup/plugin-sucrase": "^3.1.0",
-    "cleaners": "^0.3.9",
-    "edge-core-js": "^0.17.23",
-    "node-fetch": "^2.6.1"
   }
 }
