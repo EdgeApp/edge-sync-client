@@ -9,6 +9,7 @@ import {
 } from '../types/rest-types'
 import { apiRequest } from '../util/api-request'
 import { CommonOptions } from '../util/common'
+import { shuffle } from '../util/shuffle'
 import { makeInfoClient } from './info-client'
 
 export interface SyncClient {
@@ -27,9 +28,15 @@ export interface SyncClient {
 export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
   const infoClient = makeInfoClient(opts)
 
+  // Returns the sync servers from the info client shuffled
+  async function shuffledSyncServers(): Promise<string[]> {
+    const { syncServers } = await infoClient.getEdgeServers()
+    return shuffle(syncServers)
+  }
+
   return {
     async createRepo(syncKey) {
-      const { syncServers } = await infoClient.getEdgeServers()
+      const syncServers = await shuffledSyncServers()
       let error: Error = new Error(
         `Failed to create repo ${syncKey}: empty sync server list`
       )
@@ -52,7 +59,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
     },
 
     async readRepo(syncKey, lastHash) {
-      const { syncServers } = await infoClient.getEdgeServers()
+      const syncServers = await shuffledSyncServers()
       let error: Error = new Error(
         `Failed to read repo ${syncKey}: empty sync server list`
       )
@@ -75,7 +82,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
     },
 
     async updateRepo(syncKey, lastHash, body) {
-      const { syncServers } = await infoClient.getEdgeServers()
+      const syncServers = await shuffledSyncServers()
       let error: Error = new Error(
         `Failed to update repo ${syncKey}: empty sync server list`
       )
