@@ -1,6 +1,5 @@
 import { asMaybe, Cleaner } from 'cleaners'
-import { EdgeFetchFunction } from 'edge-core-js'
-import nodeFetch from 'node-fetch'
+import crossFetch from 'cross-fetch'
 
 import {
   asServerErrorResponse,
@@ -9,6 +8,7 @@ import {
   PostStoreParams,
   PutStoreParams
 } from '../types/rest-types'
+import { CommonOptions, noOp } from './common'
 
 export type ApiRequestBody = PostStoreBody
 export type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
@@ -20,24 +20,12 @@ export interface ApiRequest {
   params?: ApiRequestParams
 }
 
-export interface CommonOptions {
-  fetch?: EdgeFetchFunction
-  log?: (...args: any[]) => void
-}
-
-/**
- * Default log function for CommonOptions.
- */
-const defaultLog = (...args: any[]): void => {
-  console.log(...args)
-}
-
 export async function apiRequest<ApiResponse>(
   request: ApiRequest,
   asApiResponse: Cleaner<ApiResponse>,
   opts: CommonOptions = {}
 ): Promise<ApiResponse> {
-  const { fetch = nodeFetch, log = defaultLog } = opts
+  const { log = noOp, fetch = crossFetch } = opts
   const { method, url, body } = request
 
   const start = Date.now()

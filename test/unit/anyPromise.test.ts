@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 
-import { anyPromise } from '../src/anyPromise'
+import { anyPromise } from '../../src/anyPromise'
 
 describe('promiseAny', function () {
   it('accepts the first resolved promise', async function () {
