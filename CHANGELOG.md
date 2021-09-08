@@ -1,6 +1,6 @@
 # edge-sync-client
 
-## Unreleased
+## 0.2.0 (2021-09-07)
 
 ### Fixed
 - API change to allow `hash` field to be optional in `GetStoreResponse`
