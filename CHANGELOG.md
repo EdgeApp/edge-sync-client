@@ -1,5 +1,10 @@
 # edge-sync-client
 
+## 0.2.1 (2021-09-09)
+
+### Fixed
+- Shuffle sync server list before trying requests instead of using the same order
+
 ## 0.2.0 (2021-09-07)
 
 ### Fixed
