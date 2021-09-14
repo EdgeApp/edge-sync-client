@@ -1,5 +1,10 @@
 # edge-sync-client
 
+## 0.2.2 (2021-09-14)
+
+### Added
+- `syncKeyToRepoId` utility function added and exposed as public API.
+
 ## 0.2.1 (2021-09-09)
 
 ### Fixed
