@@ -1,9 +1,9 @@
 // @flow
 
-import { fetch } from './fetch.flow.js'
+import { type FetchFunction } from 'serverlet'
 
 type CommonOptions = {
-  fetch?: typeof fetch,
+  fetch?: FetchFunction,
   log?: (...args: any[]) => void
 }
 
