@@ -3,7 +3,7 @@
  */
 export interface CommonOptions {
   fetch?: typeof fetch
-  log?: (...args: any[]) => void
+  log?: (message: string) => void
 }
 
 /**
