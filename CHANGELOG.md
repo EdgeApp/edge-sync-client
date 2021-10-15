@@ -1,5 +1,13 @@
 # edge-sync-client
 
+## 0.2.3 (2021-10-14)
+
+- fixed: Do not include raw sync keys in log messages.
+- changed: Simplify the `log` option to only take strings.
+- changed: Simplify the `fetch` option to be a subset of the fetch API.
+
+This release isn't a breaking change because we now take a subset of what we took before, so previous options would still be acceptable.
+
 ## 0.2.2 (2021-09-14)
 
 ### Added
