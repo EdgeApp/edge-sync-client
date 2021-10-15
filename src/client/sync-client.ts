@@ -37,7 +37,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
   return {
     async createRepo(syncKey) {
       const syncServers = await shuffledSyncServers()
-      let error: Error = new Error(
+      let error: unknown = new Error(
         `Failed to create repo ${syncKey}: empty sync server list`
       )
 
@@ -60,7 +60,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
     async readRepo(syncKey, lastHash) {
       const syncServers = await shuffledSyncServers()
-      let error: Error = new Error(
+      let error: unknown = new Error(
         `Failed to read repo ${syncKey}: empty sync server list`
       )
 
@@ -83,7 +83,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
     async updateRepo(syncKey, lastHash, body) {
       const syncServers = await shuffledSyncServers()
-      let error: Error = new Error(
+      let error: unknown = new Error(
         `Failed to update repo ${syncKey}: empty sync server list`
       )
 

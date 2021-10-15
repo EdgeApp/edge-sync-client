@@ -51,7 +51,7 @@ async function fetchEdgeServers(
   opts: CommonOptions = {}
 ): Promise<EdgeServers> {
   const { log = noOp, fetch = crossFetch } = opts
-  let error: Error = new Error('No info servers')
+  let error: unknown = new Error('No info servers')
 
   // Retrieve the server lists from one of the info servers
   for (const infoServer of infoServers) {
