@@ -9,6 +9,7 @@ import {
 } from '../types/rest-types'
 import { apiRequest } from '../util/api-request'
 import { CommonOptions } from '../util/common'
+import { syncKeyToRepoId } from '../util/security'
 import { shuffle } from '../util/shuffle'
 import { makeInfoClient } from './info-client'
 
@@ -43,10 +44,11 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
       for (const syncServer of syncServers) {
         const url = `${syncServer}/api/v2/store/${syncKey}`
+        const numbUrl = url.replace(syncKey, `<${syncKeyToRepoId(syncKey)}>`)
 
         try {
           return await apiRequest(
-            { method: 'PUT', url },
+            { method: 'PUT', url, numbUrl },
             asPutStoreResponse,
             opts
           )
@@ -66,10 +68,11 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
       for (const syncServer of syncServers) {
         const url = `${syncServer}/api/v2/store/${syncKey}/${lastHash ?? ''}`
+        const numbUrl = url.replace(syncKey, `<${syncKeyToRepoId(syncKey)}>`)
 
         try {
           return await apiRequest(
-            { method: 'GET', url },
+            { method: 'GET', url, numbUrl },
             asGetStoreResponse,
             opts
           )
@@ -89,10 +92,11 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
       for (const syncServer of syncServers) {
         const url = `${syncServer}/api/v2/store/${syncKey}/${lastHash ?? ''}`
+        const numbUrl = url.replace(syncKey, `<${syncKeyToRepoId(syncKey)}>`)
 
         try {
           return await apiRequest(
-            { method: 'POST', url, body },
+            { method: 'POST', url, numbUrl, body },
             asPostStoreResponse,
             opts
           )

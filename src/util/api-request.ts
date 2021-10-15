@@ -16,6 +16,7 @@ export type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
 export interface ApiRequest {
   method: string
   url: string
+  numbUrl?: string // Clean URL for logging
   body?: ApiRequestBody
   params?: ApiRequestParams
 }
@@ -26,7 +27,7 @@ export async function apiRequest<ApiResponse>(
   opts: CommonOptions = {}
 ): Promise<ApiResponse> {
   const { log = noOp, fetch = crossFetch } = opts
-  const { method, url, body } = request
+  const { method, url, body, numbUrl = url } = request
 
   const start = Date.now()
   const response = await fetch(url, {
@@ -38,7 +39,7 @@ export async function apiRequest<ApiResponse>(
   })
   const timeElapsed = Date.now() - start
 
-  log(`${method} ${url} returned ${response.status} in ${timeElapsed}ms`)
+  log(`${method} ${numbUrl} returned ${response.status} in ${timeElapsed}ms`)
 
   const responseBody = await response.text()
 
