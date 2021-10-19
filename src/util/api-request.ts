@@ -45,14 +45,14 @@ export async function apiRequest<ApiResponse>(
 
   if (!response.ok)
     throw new Error(
-      `Failed request ${method} ${url} failed ${response.status}: ${responseBody}`
+      `Failed request ${method} ${numbUrl} failed ${response.status}: ${responseBody}`
     )
 
   const errorResponse = asMaybe(asServerErrorResponse)(responseBody)
 
   if (errorResponse != null) {
     throw new Error(
-      `Failed request ${method} ${url} failed ${response.status}: ${errorResponse.message}`
+      `Failed request ${method} ${numbUrl} failed ${response.status}: ${errorResponse.message}`
     )
   }
 
