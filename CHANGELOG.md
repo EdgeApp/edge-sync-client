@@ -1,5 +1,9 @@
 # edge-sync-client
 
+## 0.2.4 (2021-10-19)
+
+- fixed: Do not include raw sync keys in error messages.
+
 ## 0.2.3 (2021-10-14)
 
 - fixed: Do not include raw sync keys in log messages.
