@@ -1,6 +1,6 @@
 # edge-sync-client
 
-## Unreleased
+## 0.2.5 (2022-01-07)
 
 - add: Optional `apiKey` parameter to `createRepo`
 
