@@ -14,7 +14,7 @@ import { shuffle } from '../util/shuffle'
 import { makeInfoClient } from './info-client'
 
 export interface SyncClient {
-  createRepo: (syncKey: string) => Promise<PutStoreResponse>
+  createRepo: (syncKey: string, apiKey?: string) => Promise<PutStoreResponse>
   readRepo: (
     syncKey: string,
     lastHash: string | undefined
@@ -36,7 +36,7 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
   }
 
   return {
-    async createRepo(syncKey) {
+    async createRepo(syncKey, apiKey) {
       const syncServers = await shuffledSyncServers()
       let error: unknown = new Error(
         `Failed to create repo ${syncKey}: empty sync server list`
@@ -48,7 +48,12 @@ export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
 
         try {
           return await apiRequest(
-            { method: 'PUT', url, numbUrl },
+            {
+              method: 'PUT',
+              url,
+              numbUrl,
+              headers: apiKey != null ? { 'X-API-Key': apiKey } : {}
+            },
             asPutStoreResponse,
             opts
           )

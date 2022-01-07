@@ -1,5 +1,9 @@
 # edge-sync-client
 
+## Unreleased
+
+- add: Optional `apiKey` parameter to `createRepo`
+
 ## 0.2.4 (2021-10-19)
 
 - fixed: Do not include raw sync keys in error messages.
