@@ -19,6 +19,7 @@ export interface ApiRequest {
   numbUrl?: string // Clean URL for logging
   body?: ApiRequestBody
   params?: ApiRequestParams
+  headers?: { [key: string]: string }
 }
 
 export async function apiRequest<ApiResponse>(
@@ -27,13 +28,14 @@ export async function apiRequest<ApiResponse>(
   opts: CommonOptions = {}
 ): Promise<ApiResponse> {
   const { log = noOp, fetch = crossFetch } = opts
-  const { method, url, body, numbUrl = url } = request
+  const { method, url, body, numbUrl = url, headers = {} } = request
 
   const start = Date.now()
   const response = await fetch(url, {
     method,
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...headers
     },
     body: JSON.stringify(body)
   })
