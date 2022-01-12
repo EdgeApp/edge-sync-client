@@ -2,19 +2,23 @@ interface TtlCache<T> {
   get: () => T
 }
 
-export function makeTtlCache<T>(getter: () => T, ttl: number): TtlCache<T> {
+export function makeTtlCache<T>(
+  getter: (prev: T | undefined) => T,
+  ttl: number
+): TtlCache<T> {
   // End of life timestamp
   let eol = Date.now() + ttl
   // Cached value
-  let cache: T = getter()
+  let cachedValue: T = getter(undefined)
 
   return {
     get: () => {
-      if (Date.now() > eol || cache == null) {
+      if (Date.now() > eol || cachedValue == null) {
         eol = Date.now() + ttl
-        cache = getter()
+        const value = getter(cachedValue)
+        cachedValue = value
       }
-      return cache
+      return cachedValue
     }
   }
 }
