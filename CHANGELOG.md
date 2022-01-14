@@ -1,5 +1,9 @@
 # edge-sync-client
 
+## 0.2.6 (2022-01-14)
+
+- fixed: Gracefully fallback to current/default server info when info-server requests fail
+
 ## 0.2.5 (2022-01-07)
 
 - add: Optional `apiKey` parameter to `createRepo`
