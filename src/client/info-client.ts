@@ -5,25 +5,48 @@ import { NetworkError } from '../types/error'
 import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
 
-const seedInfoServers = ['https://info1.edge.app']
-
 export type EdgeServers = ReturnType<typeof asEdgeServers>
 export const asEdgeServers = asObject({
   infoServers: asArray(asString),
   syncServers: asArray(asString)
 })
 
+const defaultServerInfo: EdgeServers = {
+  infoServers: ['https://info1.edge.app'],
+  syncServers: [
+    'https://sync-us1.edge.app',
+    'https://sync-us2.edge.app',
+    'https://sync-us3.edge.app',
+    'https://sync-us4.edge.app',
+    'https://sync-us5.edge.app',
+    'https://sync-us6.edge.app',
+    'https://sync-eu1.edge.app',
+    'https://sync-eu2.edge.app',
+    'https://sync-eu3.edge.app',
+    'https://sync-eu4.edge.app',
+    'https://sync-eu5.edge.app',
+    'https://sync-eu6.edge.app'
+  ]
+}
+
 export interface InfoClient {
   getEdgeServers: () => Promise<EdgeServers>
 }
 
-export function makeInfoClient(opts: CommonOptions = {}): InfoClient {
+interface InfoClientOptions extends CommonOptions {
+  serverInfoCacheTTL?: number
+}
+
+export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
+  // 10 min TTL by default
+  const { serverInfoCacheTTL = 10 * 60 * 1000 } = opts
   // Initialize info servers list with seed info servers
-  let infoServers = seedInfoServers
+  let infoServers = defaultServerInfo.infoServers
 
   const edgeServerInfo = makeTtlCache(
-    async () => await fetchEdgeServers(infoServers, opts),
-    10 * 60 * 1000 // 10 min TTL
+    async (prev: Promise<EdgeServers> = Promise.resolve(defaultServerInfo)) =>
+      await fetchEdgeServers(infoServers, opts).catch(async _ => await prev),
+    serverInfoCacheTTL
   )
 
   return {
