@@ -20,12 +20,7 @@ const defaultServerInfo: EdgeServers = {
     'https://sync-us4.edge.app',
     'https://sync-us5.edge.app',
     'https://sync-us6.edge.app',
-    'https://sync-eu1.edge.app',
-    'https://sync-eu2.edge.app',
-    'https://sync-eu3.edge.app',
-    'https://sync-eu4.edge.app',
-    'https://sync-eu5.edge.app',
-    'https://sync-eu6.edge.app'
+    'https://sync-eu.edge.app'
   ]
 }
 
