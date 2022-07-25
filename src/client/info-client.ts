@@ -33,14 +33,23 @@ interface InfoClientOptions extends CommonOptions {
 }
 
 export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
+  const { log = () => {} } = opts
   // 10 min TTL by default
   const { serverInfoCacheTTL = 10 * 60 * 1000 } = opts
   // Initialize info servers list with seed info servers
   let infoServers = defaultServerInfo.infoServers
 
-  const edgeServerInfo = makeTtlCache(
-    async (prev: Promise<EdgeServers> = Promise.resolve(defaultServerInfo)) =>
-      await fetchEdgeServers(infoServers, opts).catch(async _ => await prev),
+  const edgeServerInfoCache = makeTtlCache(
+    (cache: { current: EdgeServers } = { current: defaultServerInfo }) => {
+      // Update cache value in the background
+      fetchEdgeServers(infoServers, opts)
+        .then(value => (cache.current = value))
+        .catch(async err => {
+          // Log the fetch error
+          log(String(err))
+        })
+      return cache
+    },
     serverInfoCacheTTL
   )
 
@@ -49,14 +58,14 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
      * Returns the cached edgeServerInfo
      */
     async getEdgeServers() {
-      const out = await edgeServerInfo.get()
+      const { current } = await edgeServerInfoCache.get()
 
       // Update infoServers list
-      if (out.infoServers.length > 0) {
-        infoServers = out.infoServers
+      if (current.infoServers.length > 0) {
+        infoServers = current.infoServers
       }
 
-      return out
+      return current
     }
   }
 }
