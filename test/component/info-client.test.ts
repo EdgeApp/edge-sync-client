@@ -36,9 +36,6 @@ describe('Component: InfoClient.getEdgeServers', () => {
 
     const edgeServersSecond = await infoClient.getEdgeServers()
 
-    console.log(edgeServersFirst)
-    console.log(edgeServersSecond)
-
     expect(edgeServersSecond).deep.equals(edgeServersFirst)
   })
 })
