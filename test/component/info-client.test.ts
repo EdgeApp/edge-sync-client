@@ -19,11 +19,11 @@ describe('Component: InfoClient.getEdgeServers', () => {
     expect(edgeServersA).equals(edgeServersB)
   })
   it('Will fail gracefully if info server is unreachable', async () => {
-    const serverInfoCacheTTL = 10
+    const edgeServersCacheTTL = 10
     let networkConnected = true
 
     const infoClient = makeInfoClient({
-      serverInfoCacheTTL,
+      edgeServersCacheTTL,
       fetch: async (...args) => {
         if (networkConnected) return await crossFetch(...args)
         throw new Error('Network Error')
@@ -32,7 +32,7 @@ describe('Component: InfoClient.getEdgeServers', () => {
     const edgeServersFirst = await infoClient.getEdgeServers()
 
     networkConnected = false
-    await delay(serverInfoCacheTTL)
+    await delay(edgeServersCacheTTL)
 
     const edgeServersSecond = await infoClient.getEdgeServers()
 

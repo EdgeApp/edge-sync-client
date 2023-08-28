@@ -11,7 +11,7 @@ export const asEdgeServers = asObject({
   syncServers: asArray(asString)
 })
 
-const defaultServerInfo: EdgeServers = {
+const defaultEdgeServers: EdgeServers = {
   infoServers: ['https://info1.edge.app'],
   syncServers: [
     'https://sync-us1.edge.app',
@@ -29,18 +29,18 @@ export interface InfoClient {
 }
 
 interface InfoClientOptions extends CommonOptions {
-  serverInfoCacheTTL?: number
+  edgeServersCacheTTL?: number
 }
 
 export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
   const { log = () => {} } = opts
   // 10 min TTL by default
-  const { serverInfoCacheTTL = 10 * 60 * 1000 } = opts
+  const { edgeServersCacheTTL = 10 * 60 * 1000 } = opts
   // Initialize info servers list with seed info servers
-  let infoServers = defaultServerInfo.infoServers
+  let infoServers = defaultEdgeServers.infoServers
 
   const edgeServerInfoCache = makeTtlCache(
-    (cache: { current: EdgeServers } = { current: defaultServerInfo }) => {
+    (cache: { current: EdgeServers } = { current: defaultEdgeServers }) => {
       // Update cache value in the background
       fetchEdgeServers(infoServers, opts)
         .then(value => (cache.current = value))
@@ -50,7 +50,7 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
         })
       return cache
     },
-    serverInfoCacheTTL
+    edgeServersCacheTTL
   )
 
   return {
