@@ -1,9 +1,21 @@
-import { asNumber, asObject, asString } from 'cleaners'
+import { asArray, asNumber, asObject, asString } from 'cleaners'
 
 import { normalizePath } from '../util/paths'
 import { VALID_PATH_REGEX, VALID_SYNC_KEY_REGEX } from '../util/regex'
 
+//
+// Sync Client API Types
+//
+
+export type EdgeServers = ReturnType<typeof asEdgeServers>
+export const asEdgeServers = asObject({
+  infoServers: asArray(asString),
+  syncServers: asArray(asString)
+})
+
+//
 // Primitive Types
+//
 
 export const asNonEmptyString = (raw: any): string => {
   const str = asString(raw)

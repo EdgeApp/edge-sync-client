@@ -1,7 +1,8 @@
 import { expect } from 'chai'
 import crossFetch from 'cross-fetch'
 
-import { asEdgeServers, makeInfoClient } from '../../src/client/info-client'
+import { makeInfoClient } from '../../src/client/info-client'
+import { asEdgeServers } from '../../src/types/base-types'
 import { delay } from '../../src/util/delay'
 
 describe('Component: InfoClient.getEdgeServers', () => {

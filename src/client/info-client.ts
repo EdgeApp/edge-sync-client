@@ -1,15 +1,9 @@
-import { asArray, asObject, asString } from 'cleaners'
 import crossFetch from 'cross-fetch'
 
+import { asEdgeServers, EdgeServers } from '../types/base-types'
 import { NetworkError } from '../types/error'
 import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
-
-export type EdgeServers = ReturnType<typeof asEdgeServers>
-export const asEdgeServers = asObject({
-  infoServers: asArray(asString),
-  syncServers: asArray(asString)
-})
 
 const defaultEdgeServers: EdgeServers = {
   infoServers: ['https://info1.edge.app'],
@@ -29,25 +23,29 @@ export interface InfoClient {
 }
 
 interface InfoClientOptions extends CommonOptions {
+  edgeServers?: EdgeServers
   edgeServersCacheTTL?: number
 }
 
 export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
-  const { log = () => {} } = opts
+  const { edgeServers = defaultEdgeServers, log = () => {} } = opts
   // 10 min TTL by default
   const { edgeServersCacheTTL = 10 * 60 * 1000 } = opts
   // Initialize info servers list with seed info servers
-  let infoServers = defaultEdgeServers.infoServers
+  let infoServers = edgeServers.infoServers
 
   const edgeServerInfoCache = makeTtlCache(
-    (cache: { current: EdgeServers } = { current: defaultEdgeServers }) => {
-      // Update cache value in the background
-      fetchEdgeServers(infoServers, opts)
-        .then(value => (cache.current = value))
-        .catch(async err => {
-          // Log the fetch error
-          log(String(err))
-        })
+    (cache: { current: EdgeServers } = { current: edgeServers }) => {
+      // Only update edge servers if there exist infoServers to query
+      if (infoServers.length > 0) {
+        // Update cache value in the background
+        fetchEdgeServers(infoServers, opts)
+          .then(value => (cache.current = value))
+          .catch(async err => {
+            // Log the fetch error
+            log(String(err))
+          })
+      }
       return cache
     },
     edgeServersCacheTTL
