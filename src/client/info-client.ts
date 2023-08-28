@@ -6,7 +6,7 @@ import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
 
 const defaultEdgeServers: EdgeServers = {
-  infoServers: ['https://info1.edge.app'],
+  infoServers: ['https://info-eu1.edge.app', 'https://info-us1.edge.app'],
   syncServers: [
     'https://sync-us1.edge.app',
     'https://sync-us2.edge.app',
