@@ -5,7 +5,7 @@ import { NetworkError } from '../types/error'
 import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
 
-const defaultEdgeServers: EdgeServers = {
+const defaultEdgeServers: Required<EdgeServers> = {
   infoServers: ['https://info-eu1.edge.app', 'https://info-us1.edge.app'],
   syncServers: [
     'https://sync-us1.edge.app',
@@ -19,7 +19,7 @@ const defaultEdgeServers: EdgeServers = {
 }
 
 export interface InfoClient {
-  getEdgeServers: () => Promise<EdgeServers>
+  getEdgeServers: () => Promise<Required<EdgeServers>>
 }
 
 interface InfoClientOptions extends CommonOptions {
@@ -28,19 +28,24 @@ interface InfoClientOptions extends CommonOptions {
 }
 
 export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
-  const { edgeServers = defaultEdgeServers, log = () => {} } = opts
+  const { log = () => {} } = opts
+  const edgeServers: Required<EdgeServers> = {
+    ...defaultEdgeServers,
+    ...opts.edgeServers
+  }
+
   // 10 min TTL by default
   const { edgeServersCacheTTL = 10 * 60 * 1000 } = opts
   // Initialize info servers list with seed info servers
   let infoServers = edgeServers.infoServers
 
   const edgeServerInfoCache = makeTtlCache(
-    (cache: { current: EdgeServers } = { current: edgeServers }) => {
+    (cache: { current: Required<EdgeServers> } = { current: edgeServers }) => {
       // Only update edge servers if there exist infoServers to query
       if (infoServers.length > 0) {
         // Update cache value in the background
         fetchEdgeServers(infoServers, opts)
-          .then(value => (cache.current = value))
+          .then(value => (cache.current = { ...cache.current, ...value }))
           .catch(async err => {
             // Log the fetch error
             log(String(err))
