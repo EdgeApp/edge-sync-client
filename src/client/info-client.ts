@@ -36,16 +36,22 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
 
   // 10 min TTL by default
   const { edgeServersCacheTTL = 10 * 60 * 1000 } = opts
-  // Initialize info servers list with seed info servers
-  let infoServers = edgeServers.infoServers
 
   const edgeServerInfoCache = makeTtlCache(
     (cache: { current: Required<EdgeServers> } = { current: edgeServers }) => {
       // Only update edge servers if there exist infoServers to query
-      if (infoServers.length > 0) {
+      if (cache.current.infoServers.length > 0) {
         // Update cache value in the background
-        fetchEdgeServers(infoServers, opts)
-          .then(value => (cache.current = { ...cache.current, ...value }))
+        fetchEdgeServers(cache.current.infoServers, opts)
+          .then(
+            value =>
+              (cache.current = {
+                ...cache.current,
+                ...value,
+                // Treat infoServers specially in order to avoid disconnection
+                infoServers: value.infoServers ?? defaultEdgeServers.infoServers
+              })
+          )
           .catch(async err => {
             // Log the fetch error
             log(String(err))
@@ -62,11 +68,6 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
      */
     async getEdgeServers() {
       const { current } = await edgeServerInfoCache.get()
-
-      // Update infoServers list
-      if (current.infoServers.length > 0) {
-        infoServers = current.infoServers
-      }
 
       return current
     }
