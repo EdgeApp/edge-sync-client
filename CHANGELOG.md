@@ -1,5 +1,9 @@
 # edge-sync-client
 
+## v0.2.8 (2023-09-06)
+
+- Added: Allow for customization of info and sync servers via edgeServers option.
+
 ## 0.2.7 (2022-07-26)
 
 - fixed: Change info-server client to not block on server request for server list
