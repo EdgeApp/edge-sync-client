@@ -1,18 +1,12 @@
-import { asArray, asObject, asString } from 'cleaners'
 import crossFetch from 'cross-fetch'
 
+import { asEdgeServers, EdgeServers } from '../types/base-types'
 import { NetworkError } from '../types/error'
 import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
 
-export type EdgeServers = ReturnType<typeof asEdgeServers>
-export const asEdgeServers = asObject({
-  infoServers: asArray(asString),
-  syncServers: asArray(asString)
-})
-
-const defaultServerInfo: EdgeServers = {
-  infoServers: ['https://info1.edge.app'],
+const defaultEdgeServers: Required<EdgeServers> = {
+  infoServers: ['https://info-eu1.edge.app', 'https://info-us1.edge.app'],
   syncServers: [
     'https://sync-us1.edge.app',
     'https://sync-us2.edge.app',
@@ -25,32 +19,47 @@ const defaultServerInfo: EdgeServers = {
 }
 
 export interface InfoClient {
-  getEdgeServers: () => Promise<EdgeServers>
+  getEdgeServers: () => Promise<Required<EdgeServers>>
 }
 
 interface InfoClientOptions extends CommonOptions {
-  serverInfoCacheTTL?: number
+  edgeServers?: EdgeServers
+  edgeServersCacheTTL?: number
 }
 
 export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
   const { log = () => {} } = opts
+  const edgeServers: Required<EdgeServers> = {
+    ...defaultEdgeServers,
+    ...opts.edgeServers
+  }
+
   // 10 min TTL by default
-  const { serverInfoCacheTTL = 10 * 60 * 1000 } = opts
-  // Initialize info servers list with seed info servers
-  let infoServers = defaultServerInfo.infoServers
+  const { edgeServersCacheTTL = 10 * 60 * 1000 } = opts
 
   const edgeServerInfoCache = makeTtlCache(
-    (cache: { current: EdgeServers } = { current: defaultServerInfo }) => {
-      // Update cache value in the background
-      fetchEdgeServers(infoServers, opts)
-        .then(value => (cache.current = value))
-        .catch(async err => {
-          // Log the fetch error
-          log(String(err))
-        })
+    (cache: { current: Required<EdgeServers> } = { current: edgeServers }) => {
+      // Only update edge servers if there exist infoServers to query
+      if (cache.current.infoServers.length > 0) {
+        // Update cache value in the background
+        fetchEdgeServers(cache.current.infoServers, opts)
+          .then(
+            value =>
+              (cache.current = {
+                ...cache.current,
+                ...value,
+                // Treat infoServers specially in order to avoid disconnection
+                infoServers: value.infoServers ?? defaultEdgeServers.infoServers
+              })
+          )
+          .catch(async err => {
+            // Log the fetch error
+            log(String(err))
+          })
+      }
       return cache
     },
-    serverInfoCacheTTL
+    edgeServersCacheTTL
   )
 
   return {
@@ -59,11 +68,6 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
      */
     async getEdgeServers() {
       const { current } = await edgeServerInfoCache.get()
-
-      // Update infoServers list
-      if (current.infoServers.length > 0) {
-        infoServers = current.infoServers
-      }
 
       return current
     }

@@ -1,9 +1,20 @@
-import { asNumber, asObject, asString } from 'cleaners'
+import { asArray, asNumber, asObject, asOptional, asString } from 'cleaners'
 
 import { normalizePath } from '../util/paths'
 import { VALID_PATH_REGEX, VALID_SYNC_KEY_REGEX } from '../util/regex'
 
+export interface EdgeServers {
+  infoServers?: string[]
+  syncServers?: string[]
+}
+export const asEdgeServers = asObject<EdgeServers>({
+  infoServers: asOptional(asArray(asString)),
+  syncServers: asOptional(asArray(asString))
+})
+
+//
 // Primitive Types
+//
 
 export const asNonEmptyString = (raw: any): string => {
   const str = asString(raw)

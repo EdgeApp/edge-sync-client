@@ -1,3 +1,4 @@
+import { EdgeServers } from '../types/base-types'
 import {
   asGetStoreResponse,
   asPostStoreResponse,
@@ -26,7 +27,11 @@ export interface SyncClient {
   ) => Promise<PostStoreResponse>
 }
 
-export function makeSyncClient(opts: CommonOptions = {}): SyncClient {
+export interface SyncClientOptions extends CommonOptions {
+  edgeServers?: EdgeServers
+}
+
+export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
   const infoClient = makeInfoClient(opts)
 
   // Returns the sync servers from the info client shuffled
