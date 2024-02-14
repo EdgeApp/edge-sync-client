@@ -1,5 +1,9 @@
 # edge-sync-client
 
+## Unreleased
+
+- added: Detect conflicts while creating repos, and report these with a new `ConflictError` type.
+
 ## v0.2.8 (2023-09-06)
 
 - Added: Allow for customization of info and sync servers via edgeServers option.
