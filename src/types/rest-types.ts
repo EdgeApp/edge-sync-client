@@ -1,3 +1,11 @@
+/**
+ * @file The types in this file describe the sync-server's REST protocol.
+ *
+ * - FooBody: The body JSON sent with the request.
+ * - FooParams: The query params passed in the URI.
+ * - FooResponse: The JSON response body the endpoint returns.
+ */
+
 import {
   asEither,
   asNull,
