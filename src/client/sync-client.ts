@@ -8,12 +8,9 @@ import {
   asPostStoreResponse,
   asPutStoreResponse,
   asServerErrorResponse,
-  GetStoreParams,
   GetStoreResponse,
   PostStoreBody,
-  PostStoreParams,
   PostStoreResponse,
-  PutStoreParams,
   PutStoreResponse
 } from '../types/rest-types'
 import { syncKeyToRepoId } from '../util/security'
@@ -129,14 +126,12 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
 }
 
 type ApiRequestBody = PostStoreBody
-type ApiRequestParams = GetStoreParams | PostStoreParams | PutStoreParams
 
 interface ApiRequest {
   method: string
   url: string
   numbUrl?: string // Clean URL for logging
   body?: ApiRequestBody
-  params?: ApiRequestParams
   headers?: { [key: string]: string }
 }
 

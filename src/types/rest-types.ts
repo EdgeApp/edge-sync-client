@@ -1,3 +1,12 @@
+/**
+ * @file The types in this file describe the sync-server's REST protocol.
+ *
+ * The type names use the following suffixes:
+ * - Body: The JSON request body sent with the request.
+ * - Params: The query params passed in the URI.
+ * - Response: The JSON response body the endpoint returns.
+ */
+
 import {
   asEither,
   asNull,
