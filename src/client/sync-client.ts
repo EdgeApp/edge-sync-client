@@ -1,5 +1,6 @@
 import { asMaybe, Cleaner } from 'cleaners'
 import crossFetch from 'cross-fetch'
+import { FetchFunction } from 'serverlet'
 
 import { EdgeServers } from '../types/base-types'
 import {
@@ -15,7 +16,6 @@ import {
   PutStoreParams,
   PutStoreResponse
 } from '../types/rest-types'
-import { CommonOptions, noOp } from '../util/common'
 import { syncKeyToRepoId } from '../util/security'
 import { shuffle } from '../util/shuffle'
 import { makeInfoClient } from './info-client'
@@ -33,7 +33,9 @@ export interface SyncClient {
   ) => Promise<PostStoreResponse>
 }
 
-export interface SyncClientOptions extends CommonOptions {
+export interface SyncClientOptions {
+  fetch?: FetchFunction
+  log?: (message: string) => void
   edgeServers?: EdgeServers
 }
 
@@ -141,9 +143,9 @@ interface ApiRequest {
 async function apiRequest<ApiResponse>(
   request: ApiRequest,
   asApiResponse: Cleaner<ApiResponse>,
-  opts: CommonOptions = {}
+  opts: SyncClientOptions = {}
 ): Promise<ApiResponse> {
-  const { log = noOp, fetch = crossFetch } = opts
+  const { log = () => {}, fetch = crossFetch } = opts
   const { method, url, body, numbUrl = url, headers = {} } = request
 
   const start = Date.now()
