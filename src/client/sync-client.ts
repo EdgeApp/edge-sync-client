@@ -3,6 +3,7 @@ import crossFetch from 'cross-fetch'
 import { FetchFunction, FetchResponse } from 'serverlet'
 
 import { EdgeServers } from '../types/base-types'
+import { ConflictError } from '../types/error'
 import {
   asGetStoreResponse,
   asPostStoreBody,
@@ -99,16 +100,18 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
       )
 
       for (const syncServer of syncServers) {
+        const repoId = syncKeyToRepoId(syncKey)
         const url = `${syncServer}/api/v2/store/${syncKey}`
         const request: ApiRequest = {
           method: 'PUT',
           url,
-          numbUrl: url.replace(syncKey, `<${syncKeyToRepoId(syncKey)}>`),
+          numbUrl: url.replace(syncKey, `<${repoId}>`),
           headers: apiKey != null ? { 'X-API-Key': apiKey } : {}
         }
 
         try {
           const response = await loggedRequest(request)
+          if (response.status === 409) throw new ConflictError({ repoId })
           return await unpackResponse(request, response, asPutStoreResponse)
         } catch (err) {
           error = err
