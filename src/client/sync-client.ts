@@ -64,7 +64,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
     return response
   }
 
-  async function openResponse<T>(
+  async function unpackResponse<T>(
     request: ApiRequest,
     response: FetchResponse,
     asApiResponse: Cleaner<T>
@@ -112,7 +112,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
         try {
           const response = await loggedRequest(request)
           if (response.status === 409) throw new ConflictError({ repoId })
-          return await openResponse(request, response, asPutStoreResponse)
+          return await unpackResponse(request, response, asPutStoreResponse)
         } catch (err) {
           error = err
         }
@@ -137,7 +137,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
 
         try {
           const response = await loggedRequest(request)
-          return await openResponse(request, response, asGetStoreResponse)
+          return await unpackResponse(request, response, asGetStoreResponse)
         } catch (err) {
           error = err
         }
@@ -163,7 +163,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
 
         try {
           const response = await loggedRequest(request)
-          return await openResponse(request, response, asPostStoreResponse)
+          return await unpackResponse(request, response, asPostStoreResponse)
         } catch (err) {
           error = err
         }
