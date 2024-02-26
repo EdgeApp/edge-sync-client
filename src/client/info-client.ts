@@ -1,8 +1,8 @@
 import crossFetch from 'cross-fetch'
+import { FetchFunction } from 'serverlet'
 
 import { asEdgeServers, EdgeServers } from '../types/base-types'
 import { NetworkError } from '../types/error'
-import { CommonOptions, noOp } from '../util/common'
 import { makeTtlCache } from '../util/ttl-cache'
 
 const defaultEdgeServers: Required<EdgeServers> = {
@@ -22,7 +22,9 @@ export interface InfoClient {
   getEdgeServers: () => Promise<Required<EdgeServers>>
 }
 
-interface InfoClientOptions extends CommonOptions {
+interface InfoClientOptions {
+  fetch?: FetchFunction
+  log?: (message: string) => void
   edgeServers?: EdgeServers
   edgeServersCacheTTL?: number
 }
@@ -79,9 +81,9 @@ export function makeInfoClient(opts: InfoClientOptions = {}): InfoClient {
  */
 async function fetchEdgeServers(
   infoServers: string[],
-  opts: CommonOptions = {}
+  opts: InfoClientOptions = {}
 ): Promise<EdgeServers> {
-  const { log = noOp, fetch = crossFetch } = opts
+  const { log = () => {}, fetch = crossFetch } = opts
   let error: unknown = new Error('No info servers')
 
   // Retrieve the server lists from one of the info servers

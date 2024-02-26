@@ -9,3 +9,21 @@ export class NetworkError extends Error {
     this.name = 'NetworkError'
   }
 }
+
+export class ConflictError extends Error {
+  name: string
+  readonly repoId: string
+
+  constructor(opts: { repoId: string }) {
+    const { repoId } = opts
+    super(`Repo ${repoId} already exists`)
+    this.name = 'ConflictError'
+    this.repoId = repoId
+  }
+}
+
+export const asMaybeConflictError = (
+  raw: unknown
+): ConflictError | undefined => {
+  if (raw instanceof Error && raw.name === 'ConflictError') return raw as any
+}

@@ -2,9 +2,15 @@
 
 import { type FetchFunction } from 'serverlet'
 
-type CommonOptions = {
+type EdgeServers = {
+  infoServers?: string[],
+  syncServers?: string[]
+}
+
+type SyncClientOptions = {
   fetch?: FetchFunction,
-  log?: (...args: any[]) => void
+  log?: (message: string) => void,
+  edgeServers?: EdgeServers
 }
 
 type EdgeBox = {
@@ -48,4 +54,4 @@ export type SyncClient = {
   ) => Promise<PostStoreResponse>
 }
 
-declare export function makeSyncClient(opts: CommonOptions): SyncClient
+declare export function makeSyncClient(opts: SyncClientOptions): SyncClient
