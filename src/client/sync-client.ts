@@ -17,7 +17,19 @@ import {
 } from '../types/rest-types'
 import { syncKeyToRepoId } from '../util/security'
 import { shuffle } from '../util/shuffle'
-import { makeInfoClient } from './info-client'
+
+const defaultEdgeServers: Required<EdgeServers> = {
+  infoServers: ['https://info-eu1.edge.app', 'https://info-us1.edge.app'],
+  syncServers: [
+    'https://sync-us1.edge.app',
+    'https://sync-us2.edge.app',
+    'https://sync-us3.edge.app',
+    'https://sync-us4.edge.app',
+    'https://sync-us5.edge.app',
+    'https://sync-us6.edge.app',
+    'https://sync-eu.edge.app'
+  ]
+}
 
 export interface SyncClient {
   createRepo: (syncKey: string, apiKey?: string) => Promise<PutStoreResponse>
@@ -40,11 +52,11 @@ export interface SyncClientOptions {
 
 export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
   const { fetch = crossFetch, log = () => {} } = opts
-  const infoClient = makeInfoClient(opts)
+  const syncServers: Required<EdgeServers>['syncServers'] =
+    opts.edgeServers?.syncServers ?? defaultEdgeServers.syncServers
 
   // Returns the sync servers from the info client shuffled
   async function shuffledSyncServers(): Promise<string[]> {
-    const { syncServers } = await infoClient.getEdgeServers()
     return shuffle(syncServers)
   }
 
