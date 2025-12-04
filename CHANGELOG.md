@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.9-1 (2024-07-30)
+
+- removed: Remove InfoClient usage for SyncClient instances
+
 ## 0.2.9 (2024-02-26)
 
 - added: Detect conflicts while creating repos, and report these with a new `ConflictError` type.

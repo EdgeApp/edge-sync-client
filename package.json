@@ -1,6 +1,6 @@
 {
   "name": "edge-sync-client",
-  "version": "0.2.9",
+  "version": "0.2.9-1",
   "description": "Library for accessing the Edge data-sync system",
   "keywords": [
     "Edge"
