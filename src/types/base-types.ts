@@ -1,4 +1,14 @@
-import { asArray, asNumber, asObject, asOptional, asString } from 'cleaners'
+import {
+  asArray,
+  asCodec,
+  asNumber,
+  asObject,
+  asOptional,
+  asString,
+  Cleaner,
+  uncleaner
+} from 'cleaners'
+import { base16, base64 } from 'rfc4648'
 
 import { normalizePath } from '../util/paths'
 import { VALID_PATH_REGEX, VALID_SYNC_KEY_REGEX } from '../util/regex'
@@ -46,9 +56,26 @@ export const asSyncKey = (raw: any): string => {
   return syncKey
 }
 
+/**
+ * A string of hex-encoded binary data.
+ */
+export const asBase16: Cleaner<Uint8Array> = asCodec(
+  raw => base16.parse(asString(raw)),
+  clean => base16.stringify(clean).toLowerCase()
+)
+
+/**
+ * A string of base64-encoded binary data.
+ */
+export const asBase64: Cleaner<Uint8Array> = asCodec(
+  raw => base64.parse(asString(raw)),
+  clean => base64.stringify(clean)
+)
+
 export type EdgeBox = ReturnType<typeof asEdgeBox>
 export const asEdgeBox = asObject({
-  iv_hex: asString,
   encryptionType: asNumber,
-  data_base64: asString
+  data_base64: asBase64,
+  iv_hex: asBase16
 })
+export const wasEdgeBox = uncleaner(asEdgeBox)

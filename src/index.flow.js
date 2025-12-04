@@ -1,5 +1,6 @@
 // @flow
 
+import { type Disklet } from 'disklet'
 import { type FetchFunction } from 'serverlet'
 
 type EdgeServers = {
@@ -7,42 +8,51 @@ type EdgeServers = {
   syncServers?: string[]
 }
 
-type SyncClientOptions = {
-  fetch?: FetchFunction,
-  log?: (message: string) => void,
-  edgeServers?: EdgeServers
+type EdgeBox = {
+  encryptionType: number,
+  data_base64: string,
+  iv_hex: string
 }
 
-type EdgeBox = {
-  iv_hex: string,
-  encryptionType: number,
-  data_base64: string
+type ChangeSet = {
+  [path: string]: EdgeBox | null
 }
 
 type PutStoreResponse = void
 
 type GetStoreResponse = {
   hash?: string | void,
-  changes: {
-    [keys: string]: EdgeBox | null
-  }
+  changes: ChangeSet
 }
 
 type PostStoreBody = {
-  changes: {
-    [keys: string]: EdgeBox | null
-  }
+  changes: ChangeSet
 }
 
 type PostStoreResponse = {
   hash: string,
-  changes: {
-    [keys: string]: EdgeBox | null
-  }
+  changes: ChangeSet
+}
+
+export type SyncStatus = {
+  lastHash: string | void,
+  lastSync: number
+}
+
+export type SyncResult = {
+  status: SyncStatus,
+  changes: ChangeSet
+}
+
+export type SyncClientOptions = {
+  fetch?: FetchFunction,
+  log?: (message: string) => void,
+  edgeServers?: EdgeServers,
+  maxChangesPerSync?: number
 }
 
 export type SyncClient = {
-  createRepo: (syncKey: string) => Promise<PutStoreResponse>,
+  createRepo: (syncKey: string, apiKey?: string) => Promise<PutStoreResponse>,
   readRepo: (
     syncKey: string,
     lastHash: string | void
@@ -51,7 +61,12 @@ export type SyncClient = {
     syncKey: string,
     lastHash: string | void,
     body: PostStoreBody
-  ) => Promise<PostStoreResponse>
+  ) => Promise<PostStoreResponse>,
+  syncRepo: (
+    disklet: Disklet,
+    syncKey: string,
+    lastHash: string | void
+  ) => Promise<SyncResult>
 }
 
-declare export function makeSyncClient(opts: SyncClientOptions): SyncClient
+declare export function makeSyncClient(opts?: SyncClientOptions): SyncClient

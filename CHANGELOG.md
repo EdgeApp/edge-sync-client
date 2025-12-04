@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- added: `syncRepo(disklet, syncKey, lastHash)` method on `SyncClient` for Disklet-based repository synchronization with `changes/`, `deleted/`, and `data/` staging directories
+
 ## 0.2.9-1 (2024-07-30)
 
 - removed: Remove InfoClient usage for SyncClient instances

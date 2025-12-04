@@ -59,6 +59,9 @@
     "rfc4648": "^1.5.0",
     "serverlet": "^0.1.0"
   },
+  "peerDependencies": {
+    "disklet": ">=0.5.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.10.4",
     "@rollup/plugin-node-resolve": "^8.1.0",
@@ -71,6 +74,7 @@
     "@typescript-eslint/parser": "^4.8.2",
     "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
+    "disklet": "^0.5.2",
     "eslint": "^7.14.0",
     "eslint-config-standard-kit": "0.15.1",
     "eslint-plugin-flowtype": "^5.2.0",
