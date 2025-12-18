@@ -543,15 +543,18 @@ describe('Component: SyncClient.syncRepo', () => {
       expect(result.status.lastHash).to.equal('existing-hash')
     })
 
-    it('returns status.lastSync as current timestamp in seconds', async () => {
+    it('returns status.lastSyncAt as current Date', async () => {
       mockSyncServer.setRepoState(TEST_SYNC_KEY, { hash: 'hash1', files: {} })
 
       const beforeTime = Date.now() / 1000
       const result = await client.syncRepo(disklet, TEST_SYNC_KEY, undefined)
       const afterTime = Date.now() / 1000
 
-      expect(result.status.lastSync).to.be.at.least(beforeTime)
-      expect(result.status.lastSync).to.be.at.most(afterTime)
+      expect(result.status.lastSyncAt).to.be.instanceOf(Date)
+      expect(result.status.lastSyncAt.getTime() / 1000).to.be.at.least(
+        beforeTime
+      )
+      expect(result.status.lastSyncAt.getTime() / 1000).to.be.at.most(afterTime)
     })
 
     it('returns changes from server response', async () => {

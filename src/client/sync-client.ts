@@ -66,8 +66,8 @@ export interface SyncResult {
 export interface SyncStatus {
   /** The last known hash from the server */
   lastHash: string | undefined
-  /** Unix timestamp of the last sync (seconds) */
-  lastSync: number
+  /** The Date of the last sync */
+  lastSyncAt: Date
 }
 
 export interface SyncClientOptions {
@@ -294,7 +294,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
       return {
         status: {
           lastHash: response.hash ?? lastHash,
-          lastSync: Date.now() / 1000
+          lastSyncAt: new Date()
         },
         changes: response.changes
       }

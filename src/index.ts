@@ -15,6 +15,8 @@ export type {
   SyncClientOptions,
   SyncResult
 } from './client/sync-client'
+export type { SyncedDisklet } from './client/sync-disklet'
+export { makeSyncedDisklet } from './client/sync-disklet'
 export { makeSyncClient } from './client/sync-client'
 
 // Util
