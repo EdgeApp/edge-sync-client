@@ -8,7 +8,11 @@ import packageJson from './package.json'
 const extensions = ['.ts']
 
 export default {
-  external: [/@babel\/runtime/, ...Object.keys(packageJson.dependencies)],
+  external: [
+    /@babel\/runtime/,
+    ...Object.keys(packageJson.dependencies),
+    ...Object.keys(packageJson.peerDependencies || {})
+  ],
   input: 'src/index.ts',
   output: [
     { file: packageJson.main, format: 'cjs' },

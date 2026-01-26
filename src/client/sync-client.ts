@@ -1,8 +1,9 @@
 import { asMaybe, Cleaner, uncleaner } from 'cleaners'
 import crossFetch from 'cross-fetch'
+import { Disklet, navigateDisklet } from 'disklet'
 import { FetchFunction, FetchResponse } from 'serverlet'
 
-import { EdgeServers } from '../types/base-types'
+import { asEdgeBox, EdgeServers, wasEdgeBox } from '../types/base-types'
 import { ConflictError } from '../types/error'
 import {
   asGetStoreResponse,
@@ -10,6 +11,7 @@ import {
   asPostStoreResponse,
   asPutStoreResponse,
   asServerErrorResponse,
+  ChangeSet,
   GetStoreResponse,
   PostStoreBody,
   PostStoreResponse,
@@ -17,7 +19,19 @@ import {
 } from '../types/rest-types'
 import { syncKeyToRepoId } from '../util/security'
 import { shuffle } from '../util/shuffle'
-import { makeInfoClient } from './info-client'
+
+const defaultEdgeServers: Required<EdgeServers> = {
+  infoServers: ['https://info-eu1.edge.app', 'https://info-us1.edge.app'],
+  syncServers: [
+    'https://sync-us1.edge.app',
+    'https://sync-us2.edge.app',
+    'https://sync-us3.edge.app',
+    'https://sync-us4.edge.app',
+    'https://sync-us5.edge.app',
+    'https://sync-us6.edge.app',
+    'https://sync-eu.edge.app'
+  ]
+}
 
 export interface SyncClient {
   createRepo: (syncKey: string, apiKey?: string) => Promise<PutStoreResponse>
@@ -30,21 +44,47 @@ export interface SyncClient {
     lastHash: string | undefined,
     body: PostStoreBody
   ) => Promise<PostStoreResponse>
+  /**
+   * Sync the repository using the provided Disklet.
+   * Gathers changes from `changes/` and deletions from `deleted/` directories,
+   * sends them to the server, applies server's response to `data/`, and clears staging directories.
+   */
+  syncRepo: (
+    disklet: Disklet,
+    syncKey: string,
+    lastHash: string | undefined
+  ) => Promise<SyncResult>
+}
+
+export interface SyncResult {
+  /** The sync status after sync */
+  status: SyncStatus
+  /** The changes received from the server */
+  changes: ChangeSet
+}
+
+export interface SyncStatus {
+  /** The last known hash from the server */
+  lastHash: string | undefined
+  /** The Date of the last sync */
+  lastSyncAt: Date
 }
 
 export interface SyncClientOptions {
   fetch?: FetchFunction
   log?: (message: string) => void
   edgeServers?: EdgeServers
+  /** Maximum number of changes to send per sync (default: 100) */
+  maxChangesPerSync?: number
 }
 
 export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
-  const { fetch = crossFetch, log = () => {} } = opts
-  const infoClient = makeInfoClient(opts)
+  const { fetch = crossFetch, log = () => {}, maxChangesPerSync = 100 } = opts
+  const syncServers: Required<EdgeServers>['syncServers'] =
+    opts.edgeServers?.syncServers ?? defaultEdgeServers.syncServers
 
   // Returns the sync servers from the info client shuffled
   async function shuffledSyncServers(): Promise<string[]> {
-    const { syncServers } = await infoClient.getEdgeServers()
     return shuffle(syncServers)
   }
 
@@ -170,6 +210,94 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
       }
 
       throw error
+    },
+
+    async syncRepo(disklet, syncKey, lastHash) {
+      // Get subdisklets for changes, deletions, and data
+      const changesDisklet = navigateDisklet(disklet, 'changes')
+      const deletedDisklet = navigateDisklet(disklet, 'deleted')
+      const dataDisklet = navigateDisklet(disklet, 'data')
+
+      // List both directories (each with limit to avoid over-listing)
+      const allChangePaths = await deepListWithLimit(
+        changesDisklet,
+        maxChangesPerSync
+      )
+      const allDeletePaths = await deepListWithLimit(
+        deletedDisklet,
+        maxChangesPerSync
+      )
+
+      // Interlace changes and deletions, respecting the limit
+      const changePaths: string[] = []
+      const deletePaths: string[] = []
+      const outgoingChanges: ChangeSet = {}
+      const maxChangesCount = Math.min(
+        maxChangesPerSync,
+        allChangePaths.length + allDeletePaths.length
+      )
+      for (let i = 0; i < maxChangesCount; i++) {
+        const pickChange = async (): Promise<void> => {
+          const path = allChangePaths[changePaths.length]
+          const data = await changesDisklet.getText(path)
+          outgoingChanges[path] = asEdgeBox(JSON.parse(data))
+          changePaths.push(path)
+        }
+        const pickDeletion = (): void => {
+          const path = allDeletePaths[deletePaths.length]
+          outgoingChanges[path] = null
+          deletePaths.push(path)
+        }
+
+        if (i % 2 === 0) {
+          if (changePaths.length < allChangePaths.length) {
+            await pickChange()
+          } else {
+            pickDeletion()
+          }
+        } else {
+          if (deletePaths.length < allDeletePaths.length) {
+            pickDeletion()
+          } else {
+            await pickChange()
+          }
+        }
+      }
+
+      // Use readRepo if no changes, updateRepo otherwise
+      const hasChanges = Object.keys(outgoingChanges).length > 0
+      const response = hasChanges
+        ? await this.updateRepo(syncKey, lastHash, { changes: outgoingChanges })
+        : await this.readRepo(syncKey, lastHash)
+
+      // Apply server's changes to the data disklet
+      for (const [path, change] of Object.entries(response.changes)) {
+        if (change === null) {
+          // Delete the file from data directory
+          await dataDisklet.delete(path)
+        } else {
+          // Write the file to data directory
+          await dataDisklet.setText(path, JSON.stringify(wasEdgeBox(change)))
+        }
+      }
+
+      // Clear synced changes from changes/ directory
+      for (const path of changePaths) {
+        await changesDisklet.delete(path)
+      }
+
+      // Clear synced deletions from deleted/ directory
+      for (const path of deletePaths) {
+        await deletedDisklet.delete(path)
+      }
+
+      return {
+        status: {
+          lastHash: response.hash ?? lastHash,
+          lastSyncAt: new Date()
+        },
+        changes: response.changes
+      }
     }
   }
 }
@@ -183,3 +311,30 @@ interface ApiRequest {
 }
 
 const wasPostStoreBody = uncleaner(asPostStoreBody)
+
+// Disklet helper functions
+
+/**
+ * Lists all files in a disklet recursively, up to a limit.
+ * Returns a list of full paths.
+ */
+
+async function deepListWithLimit(
+  disklet: Disklet,
+  limit: number,
+  path: string = ''
+): Promise<string[]> {
+  const list = await disklet.list(path)
+  const paths = Object.keys(list).filter(path => list[path] === 'file')
+  const folders = Object.keys(list).filter(path => list[path] === 'folder')
+
+  // Loop over folders to get subpaths
+  for (const folder of folders) {
+    if (paths.length >= limit) break
+    const remaining = limit - paths.length
+    const subpaths = await deepListWithLimit(disklet, remaining, folder)
+    paths.push(...subpaths.slice(0, remaining))
+  }
+
+  return paths
+}

@@ -9,7 +9,14 @@ export * from './types/rest-types'
 export { asMaybeConflictError, ConflictError } from './types/error'
 
 // Client
-export type { SyncClient, SyncClientOptions } from './client/sync-client'
+export type {
+  SyncStatus,
+  SyncClient,
+  SyncClientOptions,
+  SyncResult
+} from './client/sync-client'
+export type { SyncedDisklet } from './client/sync-disklet'
+export { makeSyncedDisklet } from './client/sync-disklet'
 export { makeSyncClient } from './client/sync-client'
 
 // Util
