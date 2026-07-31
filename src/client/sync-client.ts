@@ -3,7 +3,7 @@ import crossFetch from 'cross-fetch'
 import { FetchFunction, FetchResponse } from 'serverlet'
 
 import { EdgeServers } from '../types/base-types'
-import { ConflictError } from '../types/error'
+import { ConflictError, NetworkError } from '../types/error'
 import {
   asGetStoreResponse,
   asPostStoreBody,
@@ -36,10 +36,21 @@ export interface SyncClientOptions {
   fetch?: FetchFunction
   log?: (message: string) => void
   edgeServers?: EdgeServers
+  /** Per-request timeout in milliseconds before failing over to the next server. */
+  requestTimeoutMs?: number
 }
 
+// A silently-dead sync server (one that accepts or drops the connection without
+// ever responding) would otherwise hang the failover loop forever, so every
+// request fails over after this many milliseconds.
+const DEFAULT_REQUEST_TIMEOUT_MS = 10000
+
 export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
-  const { fetch = crossFetch, log = () => {} } = opts
+  const {
+    fetch = crossFetch,
+    log = () => {},
+    requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS
+  } = opts
   const infoClient = makeInfoClient(opts)
 
   // Returns the sync servers from the info client shuffled
@@ -51,7 +62,7 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
   async function loggedRequest(opts: ApiRequest): Promise<FetchResponse> {
     const { method, url, body, numbUrl = url, headers = {} } = opts
     const start = Date.now()
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -62,6 +73,31 @@ export function makeSyncClient(opts: SyncClientOptions = {}): SyncClient {
     const timeElapsed = Date.now() - start
     log(`${method} ${numbUrl} returned ${response.status} in ${timeElapsed}ms`)
     return response
+  }
+
+  // Races the request against a timeout so a silently-dead server rejects with a
+  // NetworkError (letting the caller fail over to the next server) instead of
+  // hanging forever. Promise.race is used rather than an AbortSignal because the
+  // injected FetchFunction is not guaranteed to honor one.
+  async function fetchWithTimeout(
+    url: string,
+    fetchOptions: Parameters<FetchFunction>[1]
+  ): Promise<FetchResponse> {
+    // Definite assignment: the Promise executor runs synchronously, so
+    // timeoutId is always set before Promise.race awaits.
+    let timeoutId!: ReturnType<typeof setTimeout>
+    const timeout = new Promise<never>((resolve, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new NetworkError(`Request timed out after ${requestTimeoutMs}ms`)
+        )
+      }, requestTimeoutMs)
+    })
+    try {
+      return await Promise.race([fetch(url, fetchOptions), timeout])
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
   async function unpackResponse<T>(

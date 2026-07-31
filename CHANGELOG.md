@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- added: Per-request timeout (configurable via `requestTimeoutMs`, default 10s) so a silently-dead sync server fails over to the next server instead of hanging forever.
+
 ## 0.2.9 (2024-02-26)
 
 - added: Detect conflicts while creating repos, and report these with a new `ConflictError` type.
